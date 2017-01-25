@@ -1,0 +1,7 @@
+program exassert
+   x,y,z,a: integer;
+begin
+	z := 0;
+	a := 0;
+	write a;
+end

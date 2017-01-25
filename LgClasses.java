@@ -99,7 +99,10 @@ class ProgNode extends MiniLgNode {
     /**
      * External printable form (print "program name" here)
      */
-    public String toString() { return super.toString() + " " + name + "\n" + b.toString(); }
+    public String toString() {
+        Idt.reset();
+        return super.toString() + " " + name + "\n" + b.toString();
+    }
 
     /**
      * builds the control graph of the program
@@ -151,9 +154,15 @@ class BlocNode extends MiniLgNode {
     /**
      * Printable form
      */
-    public String toString() { 
-        // A modifier  ... 
-        return null; 
+    public String toString() {
+        Idt.inc();
+        String s = decls.toString();
+        Idt.dec();
+        s += "begin\n";
+        Idt.inc();
+        s += insts.toString();
+        Idt.dec();
+        return s + "end\n";
     }
 
     /**
@@ -190,7 +199,19 @@ class BlocNode extends MiniLgNode {
         if (!analysisDone)
             throw new AnalyseException("Perform type analysis first");
         EnvDynamique ED = new EnvDynamique(E);
-        // ... a completer 
+
+        EnvStatique e = decls.theDecls();
+        for(Idf idf : e.getIdfSet()) {
+            if(ED.get(idf).isUninit()) {
+
+                if(e.getType(idf) == Type.INT)
+                    ED.set(idf, new Value(0));
+                else ED.set(idf, new Value(true));
+
+            }
+        }
+
+        insts.execute(ED);
     } 
 }
 
@@ -219,8 +240,13 @@ class InstsNode extends MiniLgNode {
 
     /** External printable form */                
     public String toString() {
-        // A modifier  ... 
-        return null; 
+        String s = "";
+        Iterator<InstNode> i = insts.iterator();
+        while (i.hasNext()) {
+            InstNode in = i.next();
+            s += Idt.str() + in.toString() + super.toString() + "\n";
+        }
+        return s;
     } 
 
     /**
@@ -238,15 +264,24 @@ class InstsNode extends MiniLgNode {
      * Build the control graph of the sequence of instructions
      */
     public ControlGraph buildControlGraph() {
-        // A modifier
-        return null;
+        ControlGraph g = new ControlGraph();
+        Iterator<InstNode> i = insts.iterator();
+        while (i.hasNext()) {
+            InstNode in = i.next();
+            g.addLast(in.buildControlGraph());
+        }
+        return g;
     }
 
     /** 
      * Execution
      */
-    public void execute(EnvDynamique ED) { 
-        // A completer ...
+    public void execute(EnvDynamique ED) {
+        Iterator<InstNode> i = insts.iterator();
+        while (i.hasNext()) {
+            InstNode in = i.next();
+            in.execute(ED);
+        }
     } 
 
 }
@@ -279,23 +314,19 @@ class NullNode extends  InstNode {
     NullNode(Token t) { super(t); }
 
     public String toString() {
-        // A modifier
-        return null;
+        return super.toString();
     }
 
     public  void analyse (EnvStatique E)   {}
 
     public  ControlGraph buildControlGraph() { 
-        // A modifier
-        return null;
+        return new ControlGraph();
     }
 
     /** 
      * Execution
      */
-    public void execute(EnvDynamique ED) { 
-        // A completer ... 
-    } 
+    public void execute(EnvDynamique ED) {;}
 }
 
 
@@ -327,8 +358,7 @@ class AffNode extends  InstNode {
     public Idf getIdf() { return affecte;}
 
     public String toString() { 
-        // A modifier
-        return null;
+        return affecte.toString() + " " + super.toString() + (expr == null ? "" : " " + expr.toString());
     }
 
     /** Static analysis(types) 
@@ -348,15 +378,14 @@ class AffNode extends  InstNode {
         
     /** Build the control graph of the sequence of the assignment */
     public  ControlGraph buildControlGraph() {
-        // A modifier
-        return null;
+        return new ControlGraph(this);
     }
 
     /** 
      * Execution
      */
-    public void execute(EnvDynamique ED) {  
-        // A completer ...
+    public void execute(EnvDynamique ED) {
+        ED.set(affecte, expr.evaluate(ED));
     } 
 }
 
@@ -384,9 +413,8 @@ class PAffNode extends AffNode {
         this.x = new Idf(x);
     }
 
-    public String toString() { 
-        // A modifier
-        return null;
+    public String toString() {
+        return super.toString() + " " + p.toString() + "(" + x.toString() + ")";
     }
 
     public void analyse(EnvStatique E) {
@@ -406,8 +434,10 @@ class PAffNode extends AffNode {
     /** 
      * Execution
      */
-    public void execute(EnvDynamique ED) {  
-        // A completer ... 
+    public void execute(EnvDynamique ED) {
+        int t = ED.get(x).intValue();
+        t = t * t - (4 * t) + 1;
+        ED.set(super.getIdf(), new Value(t));
     } 
 }
 
@@ -432,9 +462,19 @@ class CondNode extends  InstNode {
         thecond = c;
     }
 
-    public String toString() { 
-        // A modifier
-        return null;
+    public String toString() {
+        String s = super.toString() + " " + thecond + " then\n";
+        Idt.inc();
+        s += thenpart;
+        Idt.dec();
+        if(elsepart != null) {
+            s += Idt.str() + "else\n";
+            Idt.inc();
+            s += elsepart;
+            Idt.dec();
+        }
+        s += Idt.str() + "endif";
+        return s;
     }
         
     /** Static analysis(types) 
@@ -454,15 +494,21 @@ class CondNode extends  InstNode {
     /** Build the control graph of the  conditional
      * instruction */
     public  ControlGraph buildControlGraph() {
-        // A modifier
-        return null;
+        if(elsepart == null)
+            return new ControlGraph(thecond, thenpart.buildControlGraph(), null);
+        return new ControlGraph(thecond, thenpart.buildControlGraph(), elsepart.buildControlGraph());
+
     }
 
     /** 
      * Execution
      */
     public void execute(EnvDynamique ED) {  
-        // A completer ... 
+        if(thecond.evaluate(ED).boolValue()) {
+            thenpart.execute(ED);
+        } else if(elsepart != null) {
+            elsepart.execute(ED);
+        }
     } 
 }
 
@@ -486,9 +532,13 @@ class WhileNode extends  InstNode {
         thecond = c; 
     }
 
-    public String toString() { 
-        // A modifier
-        return null;
+    public String toString() {
+        String s = super.toString() + " " + thecond.toString() + " loop\n" ;
+        Idt.inc();
+        s += body.toString();
+        Idt.dec();
+        s += Idt.str() + "endloop";
+        return s;
     }
 
     /** Static analysis(types) 
@@ -505,16 +555,17 @@ class WhileNode extends  InstNode {
     }
 
     /** Build the control graph of the loop instruction */
-    public  ControlGraph buildControlGraph() { 
-        // A modifier
-        return null;
+    public  ControlGraph buildControlGraph() {
+        return new ControlGraph(thecond, body.buildControlGraph());
     }
 
     /** 
      * Execution
      */
     public void execute(EnvDynamique ED) {  
-        // A completer ... 
+        while(thecond.evaluate(ED).boolValue()) {
+            body.execute(ED);
+        }
     } 
 } 
 
@@ -542,8 +593,7 @@ class ReadNode extends  InstNode {
     }
 
     public String toString() { 
-        // A modifier
-        return null;
+        return super.toString() + " " + tr.toString();
     }
 
     /** Static analysis(types) 
@@ -568,9 +618,12 @@ class ReadNode extends  InstNode {
     /** 
      * Execution
      */
-    public void execute(EnvDynamique ED) {  
-        // A completer ... 
-    } 
+    public void execute(EnvDynamique ED) {
+        System.out.print("... read " + read.toString() + " (INT) : ");
+        Scanner sc = new Scanner(System.in);
+        ED.set(read, new Value(Integer.parseInt(sc.nextLine())));
+        // QUESTION
+    }
 
 }
 
@@ -592,8 +645,7 @@ class WriteNode extends  InstNode {
     }
 
     public String toString() { 
-        // A modifier
-        return null;
+        return super.toString() + " " + written.toString();
     }
 
     /** Static analysis(types) 
@@ -615,8 +667,9 @@ class WriteNode extends  InstNode {
     /** 
      * Execution
      */
-    public void execute(EnvDynamique ED) {  
-        // A completer ... 
+    public void execute(EnvDynamique ED) {
+        Value v = written.evaluate(ED);
+        System.out.println("... " + (v.isBool() ? v.boolValue() : v.intValue()));
     } 
 }
 
@@ -643,8 +696,7 @@ class AssertNode extends  InstNode {
     }
 
     public String toString() { 
-        // A modifier
-        return null;
+        return super.toString() + asserted;
     }
 
     /** Static analysis (types) 
@@ -660,15 +712,15 @@ class AssertNode extends  InstNode {
 
     /** Build the control graph of the assert instruction */
     public  ControlGraph buildControlGraph() {
-        // A modifier
-        return null;
+        return new ControlGraph(this);
     }
 
     /** 
      * Execution
      */
-    public void execute(EnvDynamique ED) {  
-        // A completer ... 
+    public void execute(EnvDynamique ED) {
+        if(!asserted.evaluate(ED).boolValue())
+            System.out.println(" [!] Assertion failed for " + asserted.toString());
     } 
 }
 
@@ -701,7 +753,7 @@ class ExprNode extends MiniLgNode {
     
     /** Constructor for leaves=int constants 
      * @param t the token of the constant 
-     * @param the corresponding integer 
+     * @param v the corresponding integer
      */
     ExprNode(Token t, int v) {
         super(t); operatorToken = t; 
@@ -757,9 +809,78 @@ class ExprNode extends MiniLgNode {
     }
 
     public String toString() {
-        // A modifier
-        return null;
-    }    
+        switch(theKind) {
+            case BINARY:
+                return "(" + fg + " " + operator + " " + fd + ")";
+            case BOOLCONST:
+                return operator + "";
+            case IDF:
+                return idf + "";
+            case INTCONST:
+                return value + "";
+            case UNARY:
+                return operator.toString() + fg + "";
+            case READ:
+                return "";
+            default:
+                throw new InternalException(" ! Switch case unhandled ");
+        }
+    }
+
+    // hileef
+
+    Value evaluate(EnvDynamique ED) {
+        switch(theKind) {
+            case BINARY:
+                switch(operator.theOp) {
+                    case PLUS:
+                        return new Value(fg.evaluate(ED).intValue() + fd.evaluate(ED).intValue());
+                    case MULT:
+                        return new Value(fg.evaluate(ED).intValue() * fd.evaluate(ED).intValue());
+                    case MOINS:
+                        return new Value(fg.evaluate(ED).intValue() - fd.evaluate(ED).intValue());
+                    case DIV:
+                        return new Value(fg.evaluate(ED).intValue() / fd.evaluate(ED).intValue());
+                    case AND:
+                        return new Value(fg.evaluate(ED).boolValue() && fd.evaluate(ED).boolValue());
+                    case OR:
+                        return new Value(fg.evaluate(ED).boolValue() || fd.evaluate(ED).boolValue());
+                    case SUP:
+                        return new Value(fg.evaluate(ED).intValue() > fd.evaluate(ED).intValue());
+                    case INF:
+                        return new Value(fg.evaluate(ED).intValue() < fd.evaluate(ED).intValue());
+                    case EGAL:
+                        Value fgt = fg.evaluate(ED);
+                        if(fgt.isBool())
+                            return new Value(fgt.boolValue() == fd.evaluate(ED).boolValue());
+                        else return new Value(fgt.intValue() == fd.evaluate(ED).intValue());
+                    default :
+                        throw new InternalException(" ! Switch case unhandled ");
+                }
+            case BOOLCONST:
+                return new Value( operator.theOp == OperatorKind.TRUE );
+            case IDF:
+                return ED.get(idf);
+            case INTCONST:
+                return new Value(value);
+            case UNARY:
+                switch(operator.theOp) {
+                    case PLUS: /* pas necessaire mais au cas ou */
+                        return new Value( + fg.evaluate(ED).intValue() );
+                    case MOINS:
+                        return new Value( - fg.evaluate(ED).intValue() );
+                    case NOT:
+                        return new Value( ! fg.evaluate(ED).boolValue() );
+                    default :
+                        throw new InternalException(" ! Switch case unhandled ");
+
+                }
+            case READ:
+                System.out.println(" READ ! in expression ");
+            default:
+                throw new InternalException(" ! Switch case unhandled ");
+        }
+    }
 
     /** 
      * result for getSimpleExpr when the expression has the expected form
@@ -950,9 +1071,14 @@ class DeclsNode extends MiniLgNode {
         decls = ld;
     }
 
-    public String toString() { 
-        // A modifier
-        return null;
+    public String toString() {
+        String s = "";
+        Iterator<DeclNode> i = decls.iterator();
+        while (i.hasNext()) {
+            DeclNode d = i.next();
+            s += Idt.str() + d.toString() + "\n";
+        }
+        return s;
     } 
 
     /** 
@@ -997,9 +1123,15 @@ class DeclNode  extends MiniLgNode {
         type = ty;
     }
 
-    public String toString() { 
-        // A modifier
-        return null;
+    public String toString() {
+        String s = "";
+        Iterator<Idf> iter = lidfs.iterator();
+        while(iter.hasNext()) {
+            Idf idf = iter.next();
+            s += idf.toString();
+            if(iter.hasNext()) s+= ", ";
+        }
+        return s + ": " + type.toString();
     }
 }
 
@@ -1020,10 +1152,26 @@ class TypeNode  extends MiniLgNode {
     }
 
     public String toString() { 
-        // A modifier
-        return null;
+        switch(type) {
+            case BOOL: return "boolean";
+            case INT: return "integer";
+            default: throw new InternalException(" ! Switch case unhandled ");
+        }
     }
 
     /** Get the type */
     public Type getType() { return type; }
+}
+
+class Idt {
+    private static int level = 0;
+    public static void reset() { level = 0; }
+    public static void inc() { level++; }
+    public static void dec() { level--; }
+    public static int get() { return level; }
+    public static String str() {
+        String s = "";
+        for(int i = 0; i < level ; i++) s += "   ";
+        return s;
+    }
 }

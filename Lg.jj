@@ -100,6 +100,7 @@ TOKEN:
   | <DP: ":">
   | <VIRG: ",">
   | <AFFECT: ":=">
+  | <P: "P">
   | <IDF:    ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])*> 
   | <INTPOS:   ["0"-"9"] (["0"-"9"])*>
   | <PLUS:   "+">
@@ -134,21 +135,21 @@ void Input(): { ProgNode m;}
             m.execute();
 
             // The control graph 
-            // ControlGraph g = m.buildControlGraph();
-            // System.out.println(g);
-            // System.out.println(g.toDotFile());
+            ControlGraph g = m.buildControlGraph();
+            System.out.println(g);
+            System.out.println(g.toDotFile());
 
             // // Abstract interpretation 
             // g.computeAbstractSigns(m.getDecls());
-            // try {
-            //     Lg.outdot.write(g.toDotFile());
-            // }
-            // catch (java.io.IOException io) {
-            //     System.err.println("IO error");
-            // }
+            try {
+                Lg.outdot.write(g.toDotFile());
+            }
+            catch (java.io.IOException io) {
+                System.err.println("IO error");
+            }
 
-            // System.out.println("assert may be violated: " 
-            //                + g.errorIsReachable());
+            // System.out.println("assert may be violated: "
+            //               + g.errorIsReachable());
         }
 }
 
@@ -297,8 +298,12 @@ AffNode InstAff(): {
     Token p, x;
 }
 {
-    idf=<IDF> t=<AFFECT> e=Expr() { return new AffNode(t, idf, e); } 
-}    
+    idf=<IDF> t=<AFFECT> (
+        p=<P> <LPAR> x=<IDF> <RPAR> { return new PAffNode(t, idf, p, x); }
+    |
+        e=Expr() { return new AffNode(t, idf, e); }
+    )
+}
 
 /* ===================================================
  */

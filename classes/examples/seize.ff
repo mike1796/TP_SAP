@@ -1,6 +1,0 @@
-
-program toto
-x : integer ;
-begin
-	x := 0 - 16 ;
-end

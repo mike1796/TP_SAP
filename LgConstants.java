@@ -57,29 +57,31 @@ public interface LgConstants {
   /** RegularExpression Id. */
   int AFFECT = 30;
   /** RegularExpression Id. */
-  int IDF = 31;
+  int P = 31;
   /** RegularExpression Id. */
-  int INTPOS = 32;
+  int IDF = 32;
   /** RegularExpression Id. */
-  int PLUS = 33;
+  int INTPOS = 33;
   /** RegularExpression Id. */
-  int MULT = 34;
+  int PLUS = 34;
   /** RegularExpression Id. */
-  int MOINS = 35;
+  int MULT = 35;
   /** RegularExpression Id. */
-  int DIV = 36;
+  int MOINS = 36;
   /** RegularExpression Id. */
-  int AND = 37;
+  int DIV = 37;
   /** RegularExpression Id. */
-  int OR = 38;
+  int AND = 38;
   /** RegularExpression Id. */
-  int NOT = 39;
+  int OR = 39;
   /** RegularExpression Id. */
-  int SUP = 40;
+  int NOT = 40;
   /** RegularExpression Id. */
-  int INF = 41;
+  int SUP = 41;
   /** RegularExpression Id. */
-  int EGAL = 42;
+  int INF = 42;
+  /** RegularExpression Id. */
+  int EGAL = 43;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -117,6 +119,7 @@ public interface LgConstants {
     "\":\"",
     "\",\"",
     "\":=\"",
+    "\"P\"",
     "<IDF>",
     "<INTPOS>",
     "\"+\"",

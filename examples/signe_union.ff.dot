@@ -1,0 +1,21 @@
+digraph g {
+"Entry0 null"->"if_entry (x == x) | 7 null"[label="true"]
+
+"if_entry (x == x) | 7 null"->"Entry1 null"[label="(x == x)"]
+"if_entry (x == x) | 7 null"->"Entry4 null"[label="!(x == x)"]
+
+"Entry1 null"->"before_assign x := 3 | 2 null"[label="true"]
+
+"before_assign x := 3 | 2 null"->"after_assign x := 3 | 3 null"[label="x := 3"]
+
+"after_assign x := 3 | 3 null"->"if_exit (x == x) | 8 null"[label="true"]
+
+"Entry4 null"->"before_assign x := 0 | 5 null"[label="true"]
+
+"before_assign x := 0 | 5 null"->"after_assign x := 0 | 6 null"[label="x := 0"]
+
+"after_assign x := 0 | 6 null"->"if_exit (x == x) | 8 null"[label="true"]
+
+
+
+}

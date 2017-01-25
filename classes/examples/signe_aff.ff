@@ -1,7 +1,0 @@
-
-program toto 
-x : integer ;
-begin
-        x:=0;
-	x:=x+1;
-end

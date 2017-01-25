@@ -1,0 +1,16 @@
+digraph g {
+"Entry0 null"->"before_assign z := 0 | 1 null"[label="true"]
+
+"before_assign z := 0 | 1 null"->"after_assign z := 0 | 2 null"[label="z := 0"]
+
+"after_assign z := 0 | 2 null"->"before_assign a := 0 | 3 null"[label="true"]
+
+"before_assign a := 0 | 3 null"->"after_assign a := 0 | 4 null"[label="a := 0"]
+
+"after_assign a := 0 | 4 null"->"before_write write a | 5 null"[label="true"]
+
+"before_write write a | 5 null"->"after_write write a | 6 null"[label="true"]
+
+
+
+}

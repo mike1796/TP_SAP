@@ -52,21 +52,21 @@ public class Lg implements LgConstants {
             m.execute();
 
             // The control graph 
-            // ControlGraph g = m.buildControlGraph();
-            // System.out.println(g);
-            // System.out.println(g.toDotFile());
+            ControlGraph g = m.buildControlGraph();
+            System.out.println(g);
+            System.out.println(g.toDotFile());
 
             // // Abstract interpretation 
             // g.computeAbstractSigns(m.getDecls());
-            // try {
-            //     Lg.outdot.write(g.toDotFile());
-            // }
-            // catch (java.io.IOException io) {
-            //     System.err.println("IO error");
-            // }
+            try {
+                Lg.outdot.write(g.toDotFile());
+            }
+            catch (java.io.IOException io) {
+                System.err.println("IO error");
+            }
 
-            // System.out.println("assert may be violated: " 
-            //                + g.errorIsReachable());
+            // System.out.println("assert may be violated: "
+            //               + g.errorIsReachable());
 
   }
 
@@ -294,8 +294,28 @@ public class Lg implements LgConstants {
     Token p, x;
     idf = jj_consume_token(IDF);
     t = jj_consume_token(AFFECT);
-    e = Expr();
-                                    {if (true) return new AffNode(t, idf, e);}
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case P:
+      p = jj_consume_token(P);
+      jj_consume_token(LPAR);
+      x = jj_consume_token(IDF);
+      jj_consume_token(RPAR);
+                                      {if (true) return new PAffNode(t, idf, p, x);}
+      break;
+    case TRUE:
+    case FALSE:
+    case LPAR:
+    case IDF:
+    case INTPOS:
+    case NOT:
+      e = Expr();
+                   {if (true) return new AffNode(t, idf, e);}
+      break;
+    default:
+      jj_la1[5] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
     throw new Error("Missing return statement in function");
   }
 
@@ -315,7 +335,7 @@ public class Lg implements LgConstants {
       el = Insts();
       break;
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[6] = jj_gen;
       ;
     }
     jj_consume_token(ENDIF);
@@ -350,7 +370,7 @@ public class Lg implements LgConstants {
       s2 = SimpleExpr();
       break;
     default:
-      jj_la1[6] = jj_gen;
+      jj_la1[7] = jj_gen;
       ;
     }
           if (s2 == null)
@@ -375,7 +395,7 @@ public class Lg implements LgConstants {
         ;
         break;
       default:
-        jj_la1[7] = jj_gen;
+        jj_la1[8] = jj_gen;
         break label_4;
       }
       t = AddOp();
@@ -401,7 +421,7 @@ public class Lg implements LgConstants {
         ;
         break;
       default:
-        jj_la1[8] = jj_gen;
+        jj_la1[9] = jj_gen;
         break label_5;
       }
       t = MulOp();
@@ -446,7 +466,7 @@ public class Lg implements LgConstants {
                          {if (true) return new ExprNode(t, u);}
       break;
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[10] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -471,7 +491,7 @@ public class Lg implements LgConstants {
                 {if (true) return t;}
       break;
     default:
-      jj_la1[10] = jj_gen;
+      jj_la1[11] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -496,7 +516,7 @@ public class Lg implements LgConstants {
                {if (true) return  t;}
       break;
     default:
-      jj_la1[11] = jj_gen;
+      jj_la1[12] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -521,7 +541,7 @@ public class Lg implements LgConstants {
                {if (true) return t;}
       break;
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[13] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -538,7 +558,7 @@ public class Lg implements LgConstants {
   static public Token jj_nt;
   static private int jj_ntk;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[13];
+  static final private int[] jj_la1 = new int[14];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -546,10 +566,10 @@ public class Lg implements LgConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x80000000,0x8109c400,0x20000000,0x300000,0x8109c400,0x1000,0x0,0x0,0x0,0x82c00000,0x0,0x0,0x0,};
+      jj_la1_0 = new int[] {0x0,0x109c400,0x20000000,0x300000,0x109c400,0x82c00000,0x1000,0x0,0x0,0x0,0x2c00000,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x700,0x4a,0x34,0x81,0x4a,0x34,0x700,};
+      jj_la1_1 = new int[] {0x1,0x1,0x0,0x0,0x1,0x103,0x0,0xe00,0x94,0x68,0x103,0x94,0x68,0xe00,};
    }
 
   /** Constructor with InputStream. */
@@ -570,7 +590,7 @@ public class Lg implements LgConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -584,7 +604,7 @@ public class Lg implements LgConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -601,7 +621,7 @@ public class Lg implements LgConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -611,7 +631,7 @@ public class Lg implements LgConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -627,7 +647,7 @@ public class Lg implements LgConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -636,7 +656,7 @@ public class Lg implements LgConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 13; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 14; i++) jj_la1[i] = -1;
   }
 
   static private Token jj_consume_token(int kind) throws ParseException {
@@ -687,12 +707,12 @@ public class Lg implements LgConstants {
   /** Generate ParseException. */
   static public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[43];
+    boolean[] la1tokens = new boolean[44];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 13; i++) {
+    for (int i = 0; i < 14; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -704,7 +724,7 @@ public class Lg implements LgConstants {
         }
       }
     }
-    for (int i = 0; i < 43; i++) {
+    for (int i = 0; i < 44; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

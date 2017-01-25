@@ -426,23 +426,77 @@ class ControlGraph {
     }
     
     ControlGraph(AssertNode an) {
-        // A completer 
+        entry = new ControlPoint("before_asert " + an.toString() + " | ");
+        exit  = new ControlPoint("after_assert " + an.toString() + " | ");
+        error = new ControlPoint("assert_error " + an.toString() + " | ");
+        entry.addCondTransition(new CondTransition(an.getExpr(), true), exit);
+        entry.addCondTransition(new CondTransition(an.getExpr(), false), error);
+        // error.
+        theControlPoints = new ArrayList<ControlPoint>();
+        theControlPoints.add(entry);
+        theControlPoints.add(error);
+        theControlPoints.add(exit);
     }
 
     // contructor for single-transition graph, made of a TRUE expression.
     // to be used for the write expressions.
     ControlGraph(WriteNode dummy) {
-        // A completer 
+        entry = new ControlPoint("before_write " + dummy.toString() + " | ");
+        exit = new ControlPoint("after_write " + dummy.toString() + " | ");
+        entry.addCondTransition(CondTransition.condTRUE, exit);
+        theControlPoints = new ArrayList<ControlPoint>();
+        theControlPoints.add(entry);
+        theControlPoints.add(exit);
     }
 
     ControlGraph(AffNode an) {
-        // A completer 
+        entry = new ControlPoint("before_assign " + an.toString() + " | ");
+        exit = new ControlPoint("after_assign " + an.toString() + " | ");
+        entry.addAssignTransition(new AssignTransition(an), exit);
+        theControlPoints = new ArrayList<ControlPoint>();
+        theControlPoints.add(entry);
+        theControlPoints.add(exit);
     }
 
 
     // Various constructors for the conditional instructions and the loops
-    // A completer ... 
+    // A completer ...
 
+    ControlGraph(ExprNode cond, ControlGraph gthen, ControlGraph gelse) {
+        entry = new ControlPoint("if_entry " + cond.toString() + " | ");
+        exit = new ControlPoint("if_exit " + cond.toString() + " | ");
+        entry.addCondTransition(new CondTransition(cond, true), gthen.entry);
+
+        if(gelse != null)
+            entry.addCondTransition(new CondTransition(cond, false), gelse.entry);
+        else
+            entry.addCondTransition(new CondTransition(cond, false), exit);
+
+        gthen.exit.addCondTransition(CondTransition.condTRUE, exit);
+
+        if(gelse != null)
+            gelse.exit.addCondTransition(CondTransition.condTRUE, exit);
+
+        theControlPoints = new ArrayList<ControlPoint>();
+        theControlPoints.add(entry);
+        theControlPoints.addAll(gthen.theControlPoints);
+        if(gelse != null)
+            theControlPoints.addAll(gelse.theControlPoints);
+        theControlPoints.add(exit);
+    }
+
+    ControlGraph(ExprNode cond, ControlGraph gbody) {
+        entry = new ControlPoint("while_entry " + cond.toString() + " | ");
+        exit = new ControlPoint("while_exit " + cond.toString() + " | ");
+        entry.addCondTransition(new CondTransition(cond, true), gbody.entry);
+        entry.addCondTransition(new CondTransition(cond, false), exit);
+        gbody.exit.addCondTransition(CondTransition.condTRUE, entry);
+
+        theControlPoints = new ArrayList<ControlPoint>();
+        theControlPoints.add(entry);
+        theControlPoints.addAll(gbody.theControlPoints);
+        theControlPoints.add(exit);
+    }
 
 
     /**
