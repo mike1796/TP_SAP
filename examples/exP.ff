@@ -1,0 +1,11 @@
+     program exempleP
+        x, y: integer;
+     begin
+        //read x;
+	y := 0;
+        if x > y then
+            x := P(x);
+        endif;
+        //write y;
+	assert(x>y);
+     end

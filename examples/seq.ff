@@ -1,0 +1,8 @@
+
+program toto 
+x : integer ;
+begin
+	x := 3 ;
+	x := 42 ;
+	x := x+1 ;
+end
