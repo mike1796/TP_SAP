@@ -7,9 +7,41 @@ digraph g {
 
 "before_assign a := 0 | 3 null"->"after_assign a := 0 | 4 null"[label="a := 0"]
 
-"after_assign a := 0 | 4 null"->"before_write write a | 5 null"[label="true"]
+"after_assign a := 0 | 4 null"->"before_assign x := 10 | 5 null"[label="true"]
 
-"before_write write a | 5 null"->"after_write write a | 6 null"[label="true"]
+"before_assign x := 10 | 5 null"->"after_assign x := 10 | 6 null"[label="x := 10"]
+
+"after_assign x := 10 | 6 null"->"before_assign y := 15 | 7 null"[label="true"]
+
+"before_assign y := 15 | 7 null"->"after_assign y := 15 | 8 null"[label="y := 15"]
+
+"after_assign y := 15 | 8 null"->"while_entry (x < y) | 20 null"[label="true"]
+
+"while_entry (x < y) | 20 null"->"Entry9 null"[label="(x < y)"]
+"while_entry (x < y) | 20 null"->"while_exit (x < y) | 21 null"[label="!(x < y)"]
+
+"Entry9 null"->"before_assign y := (y - x) | 10 null"[label="true"]
+
+"before_assign y := (y - x) | 10 null"->"after_assign y := (y - x) | 11 null"[label="y := (y - x)"]
+
+"after_assign y := (y - x) | 11 null"->"if_entry (x > a) | 15 null"[label="true"]
+
+"if_entry (x > a) | 15 null"->"Entry12 null"[label="(x > a)"]
+"if_entry (x > a) | 15 null"->"if_exit (x > a) | 16 null"[label="!(x > a)"]
+
+"Entry12 null"->"before_assign y := (y - x) | 13 null"[label="true"]
+
+"before_assign y := (y - x) | 13 null"->"after_assign y := (y - x) | 14 null"[label="y := (y - x)"]
+
+"after_assign y := (y - x) | 14 null"->"if_exit (x > a) | 16 null"[label="true"]
+
+"if_exit (x > a) | 16 null"->"before_asert assert(z > a) | 17 null"[label="true"]
+
+"before_asert assert(z > a) | 17 null"->"after_assert assert(z > a) | 18 null"[label="(z > a)"]
+"before_asert assert(z > a) | 17 null"->"assert_error assert(z > a) | 19 null"[label="!(z > a)"]
+
+
+"after_assert assert(z > a) | 18 null"->"while_entry (x < y) | 20 null"[label="true"]
 
 
 
