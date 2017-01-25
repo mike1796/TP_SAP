@@ -412,8 +412,12 @@ class ControlGraph {
     // Constructors 
 
     void addLast(ControlGraph g) {
+        exit.theTransitions = g.entry.theTransitions;
+        exit.name = g.entry.name;
+        g.theControlPoints.set(0, exit);
+        theControlPoints.remove(theControlPoints.size() - 1);
         theControlPoints.addAll(g.theControlPoints);
-        exit.addCondTransition(CondTransition.condTRUE,g.entry);
+        System.out.println(theControlPoints);
         exit = g.exit;
         if (g.error != null) error = g.error;
     }    
