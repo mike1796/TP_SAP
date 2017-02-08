@@ -1,0 +1,15 @@
+digraph g {
+"Entry0 null"->"after_assign x := 0 | 2 null"[label="x := 0"]
+
+"after_assign x := 0 | 2 null"->"after_assign z := 2 | 4 null"[label="z := 2"]
+
+"after_assign z := 2 | 4 null"->"Entry5 null"[label="(x > 2)"]
+"after_assign z := 2 | 4 null"->"if_exit (x > 2) | 9 null"[label="!(x > 2)"]
+
+"Entry5 null"->"after_assign x := 3 | 7 null"[label="x := 3"]
+
+"after_assign x := 3 | 7 null"->"if_exit (x > 2) | 9 null"[label="true"]
+
+
+
+}

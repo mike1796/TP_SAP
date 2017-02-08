@@ -1,8 +1,10 @@
 program boucle 
-  x : integer ; 
+  x : integer ;
+  z : integer ;
 begin
   x := 0 ;
-  while (x < 4) loop 
-     x := x + 1 ;
-  endloop;
+  z := 2;
+  if (x > 2) then
+    x:= 3;
+  endif;
 end
